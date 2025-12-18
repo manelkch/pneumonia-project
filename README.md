@@ -18,9 +18,9 @@ Points clés :
 
 ## Liens de Référence
 
-- Documentation du Modèle (Hugging Face) : [https://huggingface.co/sukhmani1303/pneumonia-cnn-model]
+- Documentation du Modèle (Hugging Face) : https://huggingface.co/sukhmani1303/pneumonia-cnn-model
 
-- Jeu de données de test (Kaggle) : [https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia]
+- Jeu de données de test (Kaggle) : https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia
 
 ## Architecture Technique
 
@@ -33,8 +33,8 @@ Points clés :
 - Infrastructure : Azure VM (Standard_D2s_v3), Terraform.
 
 ## Structure du Projet
-Plaintext
 
+```text
 ├── app.py              # Logique d'inférence Flask
 ├── pneumonia_cnn.h5    # Modèle Keras entraîné (150x150)
 ├── templates/          # Interface utilisateur (Frontend)
@@ -43,6 +43,7 @@ Plaintext
 ├── docker-compose.yml  # Orchestration des micro-services
 ├── main.tf             # Infrastructure as Code (Azure)
 └── deploy.sh           # Script d'automatisation globale
+```
 
 ## Déploiement et Utilisation
 
