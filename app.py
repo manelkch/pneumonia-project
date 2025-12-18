@@ -1,44 +1,50 @@
-from flask import Flask, request, jsonify
 import tensorflow as tf
-from tensorflow.keras.preprocessing import image
 import numpy as np
-import os
+from PIL import Image, ImageOps
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Chargement du modèle CNN
-MODEL_PATH = 'pneumonia_cnn.h5'
-model = tf.keras.models.load_model(MODEL_PATH)
+# Chargement du modèle
+model = tf.keras.models.load_model('pneumonia_cnn.h5')
 
-def prepare_image(img_path):
-    img = image.load_img(img_path, target_size=(224, 224))
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    return img_array / 255.0
+def prepare_image(file):
+    # 1. Ouverture avec PIL
+    img = Image.open(file)
+    # 2. Conversion en niveaux de gris (IMREAD_GRAYSCALE équivalent)
+    img = ImageOps.grayscale(img)
+    # 3. Redimensionnement à 150x150 (Dimension cruciale !)
+    img = img.resize((150, 150))
+    # 4. Normalisation et conversion array
+    img_array = np.array(img) / 255.0
+    # 5. Reshape pour le modèle : (1, 150, 150, 1)
+    prepared_img = img_array.reshape(1, 150, 150, 1).astype(np.float32)
+    return prepared_img
 
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'file' not in request.files:
-        return jsonify({'error': 'Aucun fichier envoyé'}), 400
-    
+        return jsonify({'error': 'No file part'}), 400
+   
     file = request.files['file']
-    file_path = "temp_image.jpg"
-    file.save(file_path)
-    
-    # Prédiction
-    prepared_img = prepare_image(file_path)
-    prediction = model.predict(prepared_img)
-    
-    # Nettoyage
-    os.remove(file_path)
-    
-    result = "Pneumonie" if prediction[0][0] > 0.5 else "Sain"
-    return jsonify({
-        'prediction': result,
-        'probability': float(prediction[0][0])
-    })
+    try:
+        prepared_img = prepare_image(file)
+        prediction = model.predict(prepared_img)
+       
+        # Selon votre rapport : Class 0 = Pneumonia, Class 1 = Normal
+        # Et votre logique : (prediction > 0.5) => Normal
+        prob = float(prediction[0][0])
+        label = "NORMAL" if prob > 0.5 else "PNEUMONIA"
 
-@app.route('/health', methods=['GET'])
+        return jsonify({
+            'prediction': label,
+            'probability': prob,
+            'status': 'success'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/health')
 def health():
     return jsonify({'status': 'OK', 'model_loaded': True})
 
