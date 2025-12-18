@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from PIL import Image, ImageOps
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -47,6 +47,10 @@ def predict():
 @app.route('/health')
 def health():
     return jsonify({'status': 'OK', 'model_loaded': True})
+    
+@app.route('/')
+def index():
+  return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
