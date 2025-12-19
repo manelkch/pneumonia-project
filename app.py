@@ -9,15 +9,14 @@ app = Flask(__name__)
 model = tf.keras.models.load_model('pneumonia_cnn.h5')
 
 def prepare_image(file):
-    # 1. Ouverture avec PIL
     img = Image.open(file)
-    # 2. Conversion en niveaux de gris (IMREAD_GRAYSCALE équivalent)
+    # Conversion en niveaux de gris
     img = ImageOps.grayscale(img)
-    # 3. Redimensionnement à 150x150 (Dimension cruciale !)
+    # Redimensionnement à 150x150
     img = img.resize((150, 150))
-    # 4. Normalisation et conversion array
+    # Normalisation et conversion array
     img_array = np.array(img) / 255.0
-    # 5. Reshape pour le modèle : (1, 150, 150, 1)
+    # Reshape pour le modèle : (1, 150, 150, 1)
     prepared_img = img_array.reshape(1, 150, 150, 1).astype(np.float32)
     return prepared_img
 
@@ -31,8 +30,7 @@ def predict():
         prepared_img = prepare_image(file)
         prediction = model.predict(prepared_img)
        
-        # Selon votre rapport : Class 0 = Pneumonia, Class 1 = Normal
-        # Et votre logique : (prediction > 0.5) => Normal
+        # Class 0 = Pneumonia, Class 1 = Normal
         prob = float(prediction[0][0])
         label = "NORMAL" if prob > 0.5 else "PNEUMONIA"
 
