@@ -1,4 +1,4 @@
-# 1. Définition du Provider Azure
+# Définition du Provider Azure
 terraform {
   required_providers {
     azurerm = {
@@ -12,13 +12,13 @@ provider "azurerm" {
   features {}
 }
 
-# 2. Groupe de Ressources
+# Groupe de Ressources
 resource "azurerm_resource_group" "rg" {
   name     = "pneumonia-project-rg"
   location = "West Europe"
 }
 
-# 3. Réseau Virtuel et Sous-réseau
+# Réseau Virtuel et Sous-réseau
 resource "azurerm_virtual_network" "vnet" {
   name                = "pneumo-vnet"
   address_space       = ["10.0.0.0/16"]
@@ -33,15 +33,15 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
-# 4. IP Publique
+# IP Publique
 resource "azurerm_public_ip" "pip" {
   name                = "pneumo-ip"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Static" # Static est préférable pour le script deploy.sh
+  allocation_method   = "Static" 
 }
 
-# 5. Groupe de Sécurité (NSG) - Ouverture des ports 80 (Web) et 22 (SSH)
+# Groupe de Sécurité (NSG)
 resource "azurerm_network_security_group" "nsg" {
   name                = "pneumo-nsg"
   location            = azurerm_resource_group.rg.location
@@ -72,7 +72,7 @@ resource "azurerm_network_security_group" "nsg" {
   }
 }
 
-# 6. Interface Réseau
+# Interface Réseau
 resource "azurerm_network_interface" "nic" {
   name                = "pneumo-nic"
   location            = azurerm_resource_group.rg.location
@@ -92,7 +92,7 @@ resource "azurerm_network_interface_security_group_association" "example" {
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-# 7. Machine Virtuelle Linux (Optimisée pour le Deep Learning/Inférence)
+# Machine Virtuelle Linux
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = "pneumo-server"
   resource_group_name = azurerm_resource_group.rg.name
@@ -103,13 +103,13 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub") # Assurez-vous que votre clé SSH est ici
+    public_key = file("~/.ssh/id_rsa.pub") 
   }
 
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
-    disk_size_gb         = 40 # Large espace pour Docker et TensorFlow
+    disk_size_gb         = 40 
   }
 
   source_image_reference {
@@ -120,7 +120,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 }
 
-# 8. Output pour le script d'automatisation
+# Output pour le script d'automatisation
 output "public_ip_address" {
   value = azurerm_public_ip.pip.ip_address
 }
